@@ -12,27 +12,19 @@ import java.io.Serializable;
 
 import ars.util.Beans;
 import ars.util.Nfile;
-import ars.util.Strings;
 import ars.util.SimpleTree;
 import ars.file.Operator;
 import ars.file.DiskOperator;
 import ars.file.RandomNameGenerator;
 import ars.file.DateDirectoryGenerator;
-import ars.invoke.request.Token;
 import ars.invoke.request.Requester;
-import ars.invoke.request.TokenInvalidException;
 import ars.invoke.request.AccessDeniedException;
 import ars.invoke.request.RequestHandleException;
 import ars.invoke.request.ParameterInvalidException;
-import ars.invoke.event.InvokeListener;
-import ars.invoke.Invokes;
-import ars.invoke.event.InvokeBeforeEvent;
 import ars.module.people.model.Role;
 import ars.module.people.model.User;
 import ars.module.people.model.Group;
 import ars.module.people.assist.Passwords;
-import ars.module.people.assist.SimpleTokenContainer;
-import ars.module.people.assist.TokenContainer;
 import ars.module.people.service.UserService;
 import ars.database.repository.Repositories;
 import ars.database.service.StandardGeneralService;
@@ -45,26 +37,9 @@ import ars.database.service.StandardGeneralService;
  * @param <T>
  *            数据模型
  */
-public abstract class AbstractUserService<T extends User> extends StandardGeneralService<T>
-		implements UserService<T>, InvokeListener<InvokeBeforeEvent> {
-	/**
-	 * 用户权限标识
-	 */
-	public static final String TOKEN_KEY_PERMISSION = "permission";
-
-	private String auth; // 请求认证资源地址匹配模式
+public abstract class AbstractUserService<T extends User> extends StandardGeneralService<T> implements UserService<T> {
 	private String staticDirectory; // 用户静态资源目录
 	private Operator staticOperator;
-	private int tokenTimeout = 24 * 60 * 60; // 令牌超时时间（秒）
-	private TokenContainer tokenContainer = new SimpleTokenContainer(); // 令牌容器
-
-	public String getAuth() {
-		return auth;
-	}
-
-	public void setAuth(String auth) {
-		this.auth = auth;
-	}
 
 	public String getStaticDirectory() {
 		return staticDirectory;
@@ -84,66 +59,6 @@ public abstract class AbstractUserService<T extends User> extends StandardGenera
 
 	public void setStaticOperator(Operator staticOperator) {
 		this.staticOperator = staticOperator;
-	}
-
-	public int getTokenTimeout() {
-		return tokenTimeout;
-	}
-
-	public void setTokenTimeout(int tokenTimeout) {
-		if (tokenTimeout < 1) {
-			throw new IllegalArgumentException("Illegal tokenTimeout:" + tokenTimeout);
-		}
-		this.tokenTimeout = tokenTimeout;
-	}
-
-	public TokenContainer getTokenContainer() {
-		return tokenContainer;
-	}
-
-	public void setTokenContainer(TokenContainer tokenContainer) {
-		this.tokenContainer = tokenContainer;
-	}
-
-	/**
-	 * 用户请求认证
-	 * 
-	 * @param requester
-	 *            请求对象
-	 */
-	protected void authentication(Requester requester) {
-		Token token = requester.getToken();
-		if (token == null) {
-			throw new TokenInvalidException("Token unbound");
-		}
-		token.validate();
-		String code = this.tokenContainer.get(requester.getUser());
-		if (code == null) {
-			throw new TokenInvalidException("User reset");
-		} else if (!code.equals(token.getCode())) {
-			throw new TokenInvalidException("Token reset");
-		}
-		String permission = (String) token.get(TOKEN_KEY_PERMISSION);
-		if (permission == null || !Strings.matches(requester.getUri(), permission)) {
-			throw new AccessDeniedException("No resource permission");
-		}
-	}
-
-	@Override
-	public void onInvokeEvent(InvokeBeforeEvent event) {
-		Requester requester = event.getSource();
-		if (!LOGIN_URI.equals(requester.getUri())) {
-			Requester root = null;
-			if (this.auth == null) {
-				this.authentication(requester);
-			} else if ((root = Invokes.getRootRequester(requester)) == requester) {
-				if (Strings.matches(requester.getUri(), this.auth)) {
-					this.authentication(requester);
-				}
-			} else if (Strings.matches(root.getUri(), this.auth) && Strings.matches(requester.getUri(), this.auth)) {
-				this.authentication(requester);
-			}
-		}
 	}
 
 	@Override
@@ -170,25 +85,12 @@ public abstract class AbstractUserService<T extends User> extends StandardGenera
 	}
 
 	@Override
-	public void updateObject(Requester requester, T object) {
-		User old = this.getRepository().get(object.getId());
-		boolean reset = !Beans.isEqual(object.getActive(), old.getActive())
-				|| !Beans.isEqual(object.getGroup(), old.getGroup())
-				|| !Beans.isEqual(object.getRoles(), old.getRoles());
-		super.updateObject(requester, object);
-		if (reset) {
-			this.tokenContainer.remove(object.getCode());
-		}
-	}
-
-	@Override
 	public void deleteObject(Requester requester, T object) {
 		User owner = this.getRepository().query().eq("code", requester.getUser()).single();
 		if (!owner.getAdmin() && !object.getGroup().getKey().startsWith(owner.getGroup().getKey())) {
 			throw new RequestHandleException("Unauthorized operation");
 		}
 		super.deleteObject(requester, object);
-		this.tokenContainer.remove(object.getCode());
 	}
 
 	@Override
@@ -267,7 +169,6 @@ public abstract class AbstractUserService<T extends User> extends StandardGenera
 		}
 		user.setPassword(Passwords.encode(password));
 		this.getRepository().update(user);
-		this.tokenContainer.remove(code);
 	}
 
 	@Override
@@ -285,41 +186,6 @@ public abstract class AbstractUserService<T extends User> extends StandardGenera
 			throw new RuntimeException("Static operator has not been initialize");
 		}
 		return this.staticOperator.read(path);
-	}
-
-	@Override
-	public Token login(final Requester requester, final String code, String password, Map<String, Object> parameters) {
-		User user = this.getRepository().query().eq("code", code).single();
-		if (user == null || !code.equals(user.getCode())) {
-			throw new AccessDeniedException("Unknown user");
-		} else if (user.getActive() != Boolean.TRUE) {
-			throw new AccessDeniedException("User disabled");
-		} else if (!Passwords.matches(password, user.getPassword())) {
-			throw new AccessDeniedException("Password invalid");
-		}
-		Map<String, Object> attributes = new HashMap<String, Object>(1);
-		if (user.getAdmin()) {
-			attributes.put(TOKEN_KEY_PERMISSION, "*");
-		} else if (!user.getRoles().isEmpty()) {
-			Set<String> operables = new HashSet<String>(user.getRoles().size());
-			for (Role role : user.getRoles()) {
-				String operable = role.getOperable();
-				if (operable != null) {
-					operables.add(operable);
-				}
-			}
-			if (!operables.isEmpty()) {
-				attributes.put(TOKEN_KEY_PERMISSION, Strings.join(operables, ','));
-			}
-		}
-		Token token = Token.build(Strings.LOCALHOST_ADDRESS, code, this.tokenTimeout, attributes);
-		this.tokenContainer.set(code, token.getCode(), token.getTimeout());
-		return token;
-	}
-
-	@Override
-	public void logout(Requester requester, Map<String, Object> parameters) {
-		this.tokenContainer.remove(requester.getUser());
 	}
 
 }
