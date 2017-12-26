@@ -7,7 +7,6 @@ import ars.util.Nfile;
 import ars.util.SimpleTree;
 import ars.invoke.local.Api;
 import ars.invoke.local.Param;
-import ars.invoke.request.Token;
 import ars.invoke.request.Requester;
 import ars.module.people.model.User;
 import ars.database.service.BasicService;
@@ -24,11 +23,6 @@ import ars.database.service.ExportService;
  */
 @Api("people/user")
 public interface UserService<T extends User> extends BasicService<T>, ImportService<T>, ExportService<T> {
-	/**
-	 * 用户登录资源地址
-	 */
-	public static final String LOGIN_URI = "people/user/login";
-
 	/**
 	 * 获取用户树（部门为树枝、用户为树干）
 	 * 
@@ -121,33 +115,5 @@ public interface UserService<T extends User> extends BasicService<T>, ImportServ
 	@Api("static/download")
 	public Nfile download(Requester requester, @Param(name = "path", required = true) String path,
 			Map<String, Object> parameters) throws Exception;
-
-	/**
-	 * 用户登陆
-	 * 
-	 * @param requester
-	 *            请求对象
-	 * @param code
-	 *            用户编号
-	 * @param password
-	 *            用户密码（明文）
-	 * @param parameters
-	 *            请求参数
-	 * @return 令牌对象
-	 */
-	@Api("login")
-	public Token login(Requester requester, @Param(name = "code", required = true) String code,
-			@Param(name = "password", required = true) String password, Map<String, Object> parameters);
-
-	/**
-	 * 用户注销
-	 * 
-	 * @param requester
-	 *            请求对象
-	 * @param parameters
-	 *            请求参数
-	 */
-	@Api("logout")
-	public void logout(Requester requester, Map<String, Object> parameters);
 
 }
