@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="ars.module.people.model.Logined" table="ARS_PEOPLE_LOGINED">
+		<id name="id" column="ID_" type="int">
+			<generator class="native"/>
+		</id>
+		<property name="user" column="USER_" type="string" length="50" not-null="true"/>
+		<property name="host" column="HOST_" type="string" length="50" not-null="true"/>
+		<property name="spend" column="SPEND_" type="long" not-null="true"/>
+		<property name="dateJoined" column="DATE_JOINED_" type="timestamp" not-null="true"/>
+	</class>
+</hibernate-mapping>

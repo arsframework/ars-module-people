@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="ars.module.people.model.Group" table="ARS_PEOPLE_GROUP">
+		<id name="id" column="ID_" type="int">
+			<generator class="native"/>
+		</id>
+		<property name="code" column="CODE_" type="string" length="50" not-null="true" unique="true"/>
+		<property name="name" column="NAME_" type="string" length="50" not-null="true"/>
+		<property name="phone" column="PHONE_" type="string" length="50"/>
+		<property name="fax" column="FAX_" type="string" length="50"/>
+		<property name="key" column="KEY_" type="string" length="50" not-null="true" unique="true"/>
+		<property name="level" column="LEVEL_" type="int" not-null="true"/>
+		<property name="leaf" column="LEAF_" type="boolean" not-null="true"/>
+		<property name="order" column="ORDER_" type="double"/>
+		<property name="status" column="STATUS_" type="int" not-null="true"/>
+		<property name="active" column="ACTIVE_" type="boolean" not-null="true"/>
+		<property name="remark" column="REMARK_" type="string" length="50"/>
+		<property name="creator" column="CREATOR_" type="string" length="50"/>
+		<property name="updater" column="UPDATER_" type="string" length="50"/>
+		<property name="process" column="PROCESS_" type="string" length="50"/>
+		<property name="dateJoined" column="DATE_JOINED_" type="timestamp" not-null="true"/>
+		<property name="dateUpdate" column="DATE_UPDATE_" type="timestamp"/>
+		<many-to-one name="parent" column="PARENT_ID_" class="ars.module.people.model.Group" fetch="join" lazy="false"/>
+		<list name="children" inverse="true">
+			<key column="PARENT_ID_"/>
+			<index column="ORDER_"/>
+			<one-to-many class="ars.module.people.model.Group"/>
+		</list>
+	</class>
+</hibernate-mapping>

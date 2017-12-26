@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
+
+	<!-- People module configuration -->
+	
+	<!-- User Repository -->
+ 	<bean class="ars.module.people.repository.StandardUserRepository"/>
+ 	
+ 	<!-- Role Repository -->
+	<bean class="ars.module.people.repository.StandardRoleRepository"/>
+	
+	<!-- Group Repository -->
+	<bean class="ars.module.people.repository.StandardGroupRepository"/>
+	
+	<!-- Logined Repository -->
+	<bean class="ars.module.people.repository.StandardLoginedRepository"/>
+	
+	<!-- User Service -->
+	<bean class="ars.module.people.service.StandardUserService"/>
+	
+	<!-- Role Service -->
+	<bean class="ars.module.people.service.StandardRoleService"/>
+	
+	<!-- Group Service -->
+	<bean class="ars.module.people.service.StandardGroupService"/>
+	
+	<!-- Owner Service -->
+	<bean class="ars.module.people.service.StandardOwnerService"/>
+	
+	<!-- Logined Service -->
+	<bean class="ars.module.people.service.StandardLoginedService"/>
+	
+	<!-- Auth Service -->
+	<bean class="ars.module.people.service.StandardAuthService"/>
+</beans>
