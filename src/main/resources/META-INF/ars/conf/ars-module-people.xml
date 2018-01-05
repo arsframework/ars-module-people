@@ -35,4 +35,22 @@
 	
 	<!-- Auth Service -->
 	<bean class="ars.module.people.service.StandardAuthService"/>
+	
+	<!-- Register user static file upload/download api -->
+	<bean class="ars.spring.api.AnnotationMethodApiRegister">
+		<constructor-arg value="people/user/static"/>
+		<constructor-arg>
+			<bean class="ars.file.StandardDocumentManager">
+				<property name="operator">
+					<bean class="ars.file.disk.DiskOperator">
+						<property name="workingDirectory" value="../../static/upload/user"/>
+					</bean>
+				</property>
+				<property name="nameGenerator">
+					<bean class="ars.file.RandomNameGenerator"/>
+				</property>
+			</bean>
+		</constructor-arg>
+		<constructor-arg value="upload,download"/>
+	</bean>
 </beans>

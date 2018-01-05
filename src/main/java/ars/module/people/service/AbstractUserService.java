@@ -11,12 +11,7 @@ import java.util.LinkedList;
 import java.io.Serializable;
 
 import ars.util.Beans;
-import ars.util.Nfile;
 import ars.util.SimpleTree;
-import ars.file.Operator;
-import ars.file.DiskOperator;
-import ars.file.RandomNameGenerator;
-import ars.file.DateDirectoryGenerator;
 import ars.invoke.request.Requester;
 import ars.invoke.request.AccessDeniedException;
 import ars.invoke.request.RequestHandleException;
@@ -38,28 +33,6 @@ import ars.database.service.StandardGeneralService;
  *            数据模型
  */
 public abstract class AbstractUserService<T extends User> extends StandardGeneralService<T> implements UserService<T> {
-	private String staticDirectory; // 用户静态资源目录
-	private Operator staticOperator;
-
-	public String getStaticDirectory() {
-		return staticDirectory;
-	}
-
-	public void setStaticDirectory(String staticDirectory) {
-		this.staticDirectory = staticDirectory;
-		DiskOperator operator = new DiskOperator(staticDirectory);
-		operator.setNameGenerator(new RandomNameGenerator());
-		operator.setDirectoryGenerator(new DateDirectoryGenerator());
-		this.staticOperator = operator;
-	}
-
-	public Operator getStaticOperator() {
-		return staticOperator;
-	}
-
-	public void setStaticOperator(Operator staticOperator) {
-		this.staticOperator = staticOperator;
-	}
 
 	@Override
 	public void initObject(Requester requester, T entity, Map<String, Object> parameters) {
@@ -169,23 +142,6 @@ public abstract class AbstractUserService<T extends User> extends StandardGenera
 		}
 		user.setPassword(Passwords.encode(password));
 		this.getRepository().update(user);
-	}
-
-	@Override
-	public String upload(Requester requester, String path, Nfile file, Map<String, Object> parameters)
-			throws Exception {
-		if (this.staticOperator == null) {
-			throw new RuntimeException("Static operator has not been initialize");
-		}
-		return this.staticOperator.write(file, path);
-	}
-
-	@Override
-	public Nfile download(Requester requester, String path, Map<String, Object> parameters) throws Exception {
-		if (this.staticOperator == null) {
-			throw new RuntimeException("Static operator has not been initialize");
-		}
-		return this.staticOperator.read(path);
 	}
 
 }
