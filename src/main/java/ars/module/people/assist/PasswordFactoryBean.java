@@ -2,7 +2,6 @@ package ars.module.people.assist;
 
 import org.springframework.beans.factory.FactoryBean;
 
-import ars.util.Strings;
 import ars.module.people.assist.Passwords;
 
 /**
@@ -12,20 +11,35 @@ import ars.module.people.assist.Passwords;
  * 
  */
 public class PasswordFactoryBean implements FactoryBean<String> {
-	private String password;
+	private String encrypt; // 密码密文
+	protected final String password; // 密码明文
+
+	public PasswordFactoryBean() {
+		this(Passwords.DEFAULT_PASSWORD);
+	}
 
 	public PasswordFactoryBean(String password) {
-		this.password = Passwords.encode(password);
+		if (password == null) {
+			throw new IllegalArgumentException("Illegal password:" + password);
+		}
+		this.password = password;
 	}
 
 	@Override
 	public String getObject() throws Exception {
-		return this.password;
+		if (this.encrypt == null) {
+			synchronized (this) {
+				if (this.encrypt == null) {
+					this.encrypt = Passwords.encode(this.password);
+				}
+			}
+		}
+		return this.encrypt;
 	}
 
 	@Override
 	public Class<?> getObjectType() {
-		return Strings.class;
+		return String.class;
 	}
 
 	@Override

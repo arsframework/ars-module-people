@@ -20,6 +20,8 @@ import ars.module.people.model.Role;
 import ars.module.people.model.User;
 import ars.module.people.model.Group;
 import ars.module.people.assist.Passwords;
+import ars.module.people.assist.PasswordGenerator;
+import ars.module.people.assist.SimplePasswordGenerator;
 import ars.module.people.service.UserService;
 import ars.database.repository.Repositories;
 import ars.database.service.StandardGeneralService;
@@ -33,6 +35,15 @@ import ars.database.service.StandardGeneralService;
  *            数据模型
  */
 public abstract class AbstractUserService<T extends User> extends StandardGeneralService<T> implements UserService<T> {
+	private PasswordGenerator passwordGenerator = new SimplePasswordGenerator();
+
+	public PasswordGenerator getPasswordGenerator() {
+		return passwordGenerator;
+	}
+
+	public void setPasswordGenerator(PasswordGenerator passwordGenerator) {
+		this.passwordGenerator = passwordGenerator;
+	}
 
 	@Override
 	public void initObject(Requester requester, T entity, Map<String, Object> parameters) {
@@ -50,7 +61,7 @@ public abstract class AbstractUserService<T extends User> extends StandardGenera
 	@Override
 	public Serializable saveObject(Requester requester, T object) {
 		if (object.getPassword() == null) {
-			object.setPassword(Passwords.encode("123456"));
+			object.setPassword(Passwords.encode(this.passwordGenerator.generate(object)));
 		} else {
 			object.setPassword(Passwords.encode(object.getPassword()));
 		}

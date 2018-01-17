@@ -9,7 +9,16 @@ import org.springframework.security.crypto.password.StandardPasswordEncoder;
  * 
  */
 public final class Passwords {
+	/**
+	 * 默认密码
+	 */
+	public static final String DEFAULT_PASSWORD = "123456";
+
 	private static final StandardPasswordEncoder passwordEncoder = new StandardPasswordEncoder();
+
+	private Passwords() {
+
+	}
 
 	/**
 	 * 明文加密
