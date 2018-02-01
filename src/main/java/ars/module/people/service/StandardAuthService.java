@@ -61,13 +61,6 @@ public class StandardAuthService
 	 */
 	public static final String SESSION_KEY_VALID_CODE = "__login_valid_code";
 
-	/**
-	 * 验证码字符数组
-	 */
-	public static final Character[] CHARS = new Character[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A',
-			'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
-			'Y', 'Z' }; // 验证码字符数组
-
 	private String pattern; // 请求认证资源地址匹配模式
 	private int errors = 5; // 可出错次数
 	private Cache cache = new SimpleCache(); // 认证信息缓存
@@ -226,7 +219,7 @@ public class StandardAuthService
 	@Override
 	public byte[] verifycode(Requester requester, Map<String, Object> parameters) throws IOException {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		String content = Strings.random(4, CHARS);
+		String content = Strings.random(4, Strings.CHARS).toUpperCase();
 		ImageIO.write(Opcodes.encode(content), "jpg", output);
 		requester.getSession().setAttribute(SESSION_KEY_VALID_CODE, content);
 		return output.toByteArray();
@@ -269,6 +262,12 @@ public class StandardAuthService
 	@Override
 	public void logout(Requester requester, Map<String, Object> parameters) {
 		this.cache.remove(TOKEN_CACHE_PREFIX + requester.getUser());
+	}
+
+	@Override
+	public boolean permissible(Requester requester, String uri, Map<String, Object> parameters) {
+		String permission = (String) requester.getToken().get(TOKEN_KEY_PERMISSION);
+		return permission != null && Strings.matches(uri, permission);
 	}
 
 }

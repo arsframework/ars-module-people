@@ -58,4 +58,19 @@ public interface AuthService {
 	@Api("logout")
 	public void logout(Requester requester, Map<String, Object> parameters);
 
+	/**
+	 * 判断资源是否允许访问
+	 * 
+	 * @param requester
+	 *            请求对象
+	 * @param uri
+	 *            资源地址
+	 * @param parameters
+	 *            请求参数
+	 * @return true/false
+	 */
+	@Api("permissible")
+	public boolean permissible(Requester requester, @Param(name = "uri", required = true) String uri,
+			Map<String, Object> parameters);
+
 }
