@@ -154,9 +154,12 @@ public class StandardAuthService
 		Map<String, Object> attributes = new HashMap<String, Object>(1);
 		if (user.getAdmin()) {
 			attributes.put(TOKEN_KEY_PERMISSION, "*");
-		} else if (!user.getRoles().isEmpty()) {
+		} else {
 			Set<String> operables = new HashSet<String>(user.getRoles().size());
 			for (Role role : user.getRoles()) {
+				if (!role.getActive()) {
+					continue;
+				}
 				String operable = role.getOperable();
 				if (operable != null) {
 					operables.add(operable);

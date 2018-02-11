@@ -14,7 +14,6 @@ import ars.util.Beans;
 import ars.util.SimpleTree;
 import ars.invoke.request.Requester;
 import ars.invoke.request.AccessDeniedException;
-import ars.invoke.request.RequestHandleException;
 import ars.invoke.request.ParameterInvalidException;
 import ars.module.people.model.Role;
 import ars.module.people.model.User;
@@ -50,11 +49,11 @@ public abstract class AbstractUserService<T extends User> extends StandardGenera
 		super.initObject(requester, entity, parameters);
 		Group group = entity.getGroup();
 		if (group == null) {
-			throw new AccessDeniedException("Illegal operation");
+			throw new AccessDeniedException("error.data.illegal");
 		}
 		User owner = this.getRepository().query().eq("code", requester.getUser()).single();
 		if (!owner.getAdmin() && !group.getKey().startsWith(owner.getGroup().getKey())) {
-			throw new AccessDeniedException("Illegal operation");
+			throw new AccessDeniedException("error.data.illegal");
 		}
 	}
 
@@ -72,7 +71,7 @@ public abstract class AbstractUserService<T extends User> extends StandardGenera
 	public void deleteObject(Requester requester, T object) {
 		User owner = this.getRepository().query().eq("code", requester.getUser()).single();
 		if (!owner.getAdmin() && !object.getGroup().getKey().startsWith(owner.getGroup().getKey())) {
-			throw new RequestHandleException("Unauthorized operation");
+			throw new AccessDeniedException("error.data.unauthorized");
 		}
 		super.deleteObject(requester, object);
 	}

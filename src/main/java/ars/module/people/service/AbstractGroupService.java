@@ -1,13 +1,14 @@
 package ars.module.people.service;
 
+import java.util.List;
 import java.util.Map;
 
 import ars.invoke.request.Requester;
 import ars.invoke.request.AccessDeniedException;
-import ars.invoke.request.RequestHandleException;
 import ars.invoke.request.ParameterInvalidException;
 import ars.database.repository.Query;
 import ars.database.repository.Repositories;
+import ars.database.repository.Repository;
 import ars.database.service.StandardGeneralService;
 import ars.module.people.model.User;
 import ars.module.people.model.Group;
@@ -29,9 +30,9 @@ public abstract class AbstractGroupService<T extends Group> extends StandardGene
 		super.initObject(requester, entity, parameters);
 		Group parent = entity.getParent();
 		User owner = Repositories.getRepository(User.class).query().eq("code", requester.getUser()).single();
-		if (!owner.getAdmin() && this.getRepository().get(owner.getGroup().getId()).getParent() != null
+		if (!owner.getAdmin() && owner.getGroup().getParent() != null
 				&& (parent == null || !parent.getKey().startsWith(owner.getGroup().getKey()))) {
-			throw new AccessDeniedException("Illegal operation");
+			throw new AccessDeniedException("error.data.illegal");
 		}
 		Query<T> query = this.getRepository().query().ne("id", entity.getId()).eq("name", entity.getName());
 		if (parent == null) {
@@ -44,11 +45,39 @@ public abstract class AbstractGroupService<T extends Group> extends StandardGene
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public void updateObject(Requester requester, T object) {
+		T parent = (T) object.getParent();
+		Repository<T> repository = this.getRepository();
+		T old = repository.get(object.getId());
+		super.updateObject(requester, object);
+		if (old.getActive() != object.getActive()) {
+			if (object.getActive() == Boolean.TRUE) {
+				while (parent != null) {
+					if (parent.getActive() == Boolean.FALSE) {
+						parent.setActive(true);
+						repository.update(parent);
+					}
+					parent = (T) parent.getParent();
+				}
+			} else if (object.getActive() == Boolean.FALSE) {
+				List<T> groups = repository.query().ne("id", object.getId()).eq("active", true)
+						.start("key", object.getKey()).list();
+				for (int i = 0; i < groups.size(); i++) {
+					T group = groups.get(i);
+					group.setActive(false);
+					repository.update(group);
+				}
+			}
+		}
+	}
+
 	@Override
 	public void deleteObject(Requester requester, T object) {
 		User owner = Repositories.getRepository(User.class).query().eq("code", requester.getUser()).single();
 		if (!owner.getAdmin() && !object.getKey().startsWith(owner.getGroup().getKey())) {
-			throw new RequestHandleException("Unauthorized operation");
+			throw new AccessDeniedException("error.data.unauthorized");
 		}
 		super.deleteObject(requester, object);
 	}
