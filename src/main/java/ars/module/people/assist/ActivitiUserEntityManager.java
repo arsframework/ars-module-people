@@ -26,11 +26,13 @@ public class ActivitiUserEntityManager extends UserEntityManager {
 		Set<Role> roles = user.getRoles();
 		List<Group> groups = new ArrayList<Group>(roles.size());
 		for (Role role : roles) {
-			GroupEntity group = new GroupEntity();
-			group.setId(role.getCode());
-			group.setName(role.getName());
-			group.setType("assignment");
-			groups.add(group);
+			if (role.getActive()) {
+				GroupEntity group = new GroupEntity();
+				group.setId(role.getCode());
+				group.setName(role.getName());
+				group.setType("assignment");
+				groups.add(group);
+			}
 		}
 		return groups;
 	}

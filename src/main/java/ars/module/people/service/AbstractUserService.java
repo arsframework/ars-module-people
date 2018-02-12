@@ -49,11 +49,11 @@ public abstract class AbstractUserService<T extends User> extends StandardGenera
 		super.initObject(requester, entity, parameters);
 		Group group = entity.getGroup();
 		if (group == null) {
-			throw new AccessDeniedException("error.data.illegal");
+			throw new ParameterInvalidException("group", "required");
 		}
 		User owner = this.getRepository().query().eq("code", requester.getUser()).single();
 		if (!owner.getAdmin() && !group.getKey().startsWith(owner.getGroup().getKey())) {
-			throw new AccessDeniedException("error.data.illegal");
+			throw new ParameterInvalidException("group", "illegal");
 		}
 	}
 

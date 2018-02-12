@@ -26,8 +26,8 @@ public abstract class AbstractRoleService<T extends Role> extends StandardGenera
 		User user = Repositories.getRepository(User.class).query().in("roles.id", new Integer[] { object.getId() })
 				.paging(1, 1).single();
 		if (user != null) {
-			String message = new StringBuilder(requester.format(user.getClass().getName())).append('【')
-					.append(user.toString()).append('】').toString();
+			String message = new StringBuilder(requester.format(user.getClass().getName())).append('[')
+					.append(user.toString()).append(']').toString();
 			throw new DataConstraintException(message);
 		}
 		super.deleteObject(requester, object);

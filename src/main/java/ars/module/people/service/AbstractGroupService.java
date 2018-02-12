@@ -1,7 +1,7 @@
 package ars.module.people.service;
 
-import java.util.List;
 import java.util.Map;
+import java.util.List;
 
 import ars.invoke.request.Requester;
 import ars.invoke.request.AccessDeniedException;
@@ -32,7 +32,7 @@ public abstract class AbstractGroupService<T extends Group> extends StandardGene
 		User owner = Repositories.getRepository(User.class).query().eq("code", requester.getUser()).single();
 		if (!owner.getAdmin() && owner.getGroup().getParent() != null
 				&& (parent == null || !parent.getKey().startsWith(owner.getGroup().getKey()))) {
-			throw new AccessDeniedException("error.data.illegal");
+			throw new ParameterInvalidException("parent", "illegal");
 		}
 		Query<T> query = this.getRepository().query().ne("id", entity.getId()).eq("name", entity.getName());
 		if (parent == null) {
