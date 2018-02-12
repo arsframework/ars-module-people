@@ -221,11 +221,15 @@ public class StandardAuthService
 
 	@Override
 	public byte[] verifycode(Requester requester, Map<String, Object> parameters) throws IOException {
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		String content = Strings.random(4, Strings.CHARS).toUpperCase();
-		ImageIO.write(Opcodes.encode(content), "jpg", output);
+		String content = Strings.random(Strings.CHARS, 4).toUpperCase();
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		try {
+			ImageIO.write(Opcodes.encode(content), "jpg", bos);
+		} finally {
+			bos.close();
+		}
 		requester.getSession().setAttribute(SESSION_KEY_VALID_CODE, content);
-		return output.toByteArray();
+		return bos.toByteArray();
 	}
 
 	@Override
