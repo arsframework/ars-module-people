@@ -9,8 +9,6 @@ import ars.invoke.local.Param;
 import ars.invoke.request.Requester;
 import ars.module.people.model.User;
 import ars.database.service.BasicService;
-import ars.database.service.ImportService;
-import ars.database.service.ExportService;
 
 /**
  * 用户业务操作接口
@@ -21,7 +19,7 @@ import ars.database.service.ExportService;
  *            数据模型
  */
 @Api("people/user")
-public interface UserService<T extends User> extends BasicService<T>, ImportService<T>, ExportService<T> {
+public interface UserService<T extends User> extends BasicService<T> {
 	/**
 	 * 获取用户树（部门为树枝、用户为树干）
 	 * 

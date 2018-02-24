@@ -22,6 +22,7 @@ import ars.module.people.assist.Passwords;
 import ars.module.people.assist.PasswordGenerator;
 import ars.module.people.assist.SimplePasswordGenerator;
 import ars.module.people.service.UserService;
+import ars.database.repository.Query;
 import ars.database.repository.Repositories;
 import ars.database.service.StandardGeneralService;
 
@@ -34,9 +35,16 @@ import ars.database.service.StandardGeneralService;
  *            数据模型
  */
 public abstract class AbstractUserService<T extends User> extends StandardGeneralService<T> implements UserService<T> {
-	private PasswordGenerator passwordGenerator = new SimplePasswordGenerator();
+	private PasswordGenerator passwordGenerator;
 
 	public PasswordGenerator getPasswordGenerator() {
+		if (this.passwordGenerator == null) {
+			synchronized (this) {
+				if (this.passwordGenerator == null) {
+					this.passwordGenerator = new SimplePasswordGenerator();
+				}
+			}
+		}
 		return passwordGenerator;
 	}
 
@@ -60,7 +68,7 @@ public abstract class AbstractUserService<T extends User> extends StandardGenera
 	@Override
 	public Serializable saveObject(Requester requester, T object) {
 		if (object.getPassword() == null) {
-			object.setPassword(Passwords.encode(this.passwordGenerator.generate(object)));
+			object.setPassword(Passwords.encode(this.getPasswordGenerator().generate(object)));
 		} else {
 			object.setPassword(Passwords.encode(object.getPassword()));
 		}
@@ -84,8 +92,11 @@ public abstract class AbstractUserService<T extends User> extends StandardGenera
 				? Repositories.getRepository(Group.class).query().ge("level", level).in("id", groups).asc("order")
 						.list()
 				: new LinkedList<Group>();
-		List<T> objects = grouped ? this.getQuery(requester, parameters).in("group.id", groups).list()
-				: this.getQuery(requester, parameters).list();
+		Query<T> query = this.getQuery(requester).custom(parameters);
+		if (grouped) {
+			query.in("group.id", groups);
+		}
+		List<T> objects = query.list();
 		if (!grouped && objects.isEmpty()) {
 			return new ArrayList<SimpleTree>(0);
 		}
