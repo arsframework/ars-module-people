@@ -31,19 +31,19 @@ import ars.database.repository.Repositories;
 public class StandardOwnerService implements OwnerService {
 
 	@Override
-	public User info(Requester requester, Map<String, Object> parameters) {
+	public User info(Requester requester) {
 		return Repositories.getRepository(User.class).query().eq("code", requester.getUser()).single();
 	}
 
 	@Override
-	public Logined logined(Requester requester, Map<String, Object> parameters) {
+	public Logined logined(Requester requester) {
 		List<Logined> logs = Repositories.getRepository(Logined.class).query().eq("user", requester.getUser())
 				.paging(1, 2).desc("dateJoined").list();
 		return logs.size() < 2 ? null : logs.get(0);
 	}
 
 	@Override
-	public List<Menu> menus(Requester requester, Map<String, Object> parameters) {
+	public List<Menu> menus(Requester requester) {
 		User owner = Repositories.getRepository(User.class).query().eq("code", requester.getUser()).single();
 		if (owner.getAdmin() == Boolean.TRUE) {
 			List<Menu> menus = Repositories.getRepository(Menu.class).query().eq("active", true).asc("order").list();
@@ -80,7 +80,8 @@ public class StandardOwnerService implements OwnerService {
 	}
 
 	@Override
-	public void update(Requester requester, Integer id, Map<String, Object> parameters) {
+	public void update(Requester requester, Integer id) {
+		Map<String, Object> parameters = requester.getParameters();
 		Repository<User> repository = Repositories.getRepository(User.class);
 		User owner = repository.get(id);
 		if (owner != null && !parameters.isEmpty()) {
@@ -112,7 +113,7 @@ public class StandardOwnerService implements OwnerService {
 	}
 
 	@Override
-	public void password(Requester requester, String original, String password, Map<String, Object> parameters) {
+	public void password(Requester requester, String original, String password) {
 		Repository<User> repository = Repositories.getRepository(User.class);
 		User user = repository.query().eq("code", requester.getUser()).single();
 		if (!Passwords.matches(original, user.getPassword())) {

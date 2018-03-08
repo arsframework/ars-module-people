@@ -137,12 +137,9 @@ public class StandardAuthService
 	 *            用户编号
 	 * @param password
 	 *            用户密码（明文）
-	 * @param parameters
-	 *            请求参数
 	 * @return 令牌对象
 	 */
-	protected Token doLogin(final Requester requester, final String code, String password,
-			Map<String, Object> parameters) {
+	protected Token doLogin(final Requester requester, final String code, String password) {
 		User user = Repositories.getRepository(User.class).query().eq("code", code).single();
 		if (user == null || !code.equals(user.getCode())) {
 			throw new AccessDeniedException("error.user.unknown");
@@ -220,7 +217,7 @@ public class StandardAuthService
 	}
 
 	@Override
-	public byte[] verifycode(Requester requester, Map<String, Object> parameters) throws IOException {
+	public byte[] verifycode(Requester requester) throws IOException {
 		String content = Strings.random(Strings.CHARS, 4).toUpperCase();
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		try {
@@ -233,9 +230,9 @@ public class StandardAuthService
 	}
 
 	@Override
-	public Token login(Requester requester, String code, String password, Map<String, Object> parameters) {
+	public Token login(Requester requester, String code, String password) {
 		if (this.errors == 0) {
-			return this.doLogin(requester, code, password, parameters);
+			return this.doLogin(requester, code, password);
 		}
 		Session session = requester.getSession();
 		Integer failed = (Integer) session.getAttribute(SESSION_KEY_ERRORS);
@@ -248,7 +245,7 @@ public class StandardAuthService
 			}
 		}
 		try {
-			Token token = this.doLogin(requester, code, password, parameters);
+			Token token = this.doLogin(requester, code, password);
 			session.removeAttribute(SESSION_KEY_ERRORS);
 			return token;
 		} catch (Exception e) {
@@ -267,12 +264,12 @@ public class StandardAuthService
 	}
 
 	@Override
-	public void logout(Requester requester, Map<String, Object> parameters) {
+	public void logout(Requester requester) {
 		this.cache.remove(TOKEN_CACHE_PREFIX + requester.getUser());
 	}
 
 	@Override
-	public boolean permissible(Requester requester, String uri, Map<String, Object> parameters) {
+	public boolean permissible(Requester requester, String uri) {
 		String permission = (String) requester.getToken().get(TOKEN_KEY_PERMISSION);
 		return permission != null && Strings.matches(uri, permission);
 	}

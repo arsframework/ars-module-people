@@ -53,8 +53,8 @@ public abstract class AbstractUserService<T extends User> extends StandardGenera
 	}
 
 	@Override
-	public void initObject(Requester requester, T entity, Map<String, Object> parameters) {
-		super.initObject(requester, entity, parameters);
+	public void initObject(Requester requester, T entity) {
+		super.initObject(requester, entity);
 		Group group = entity.getGroup();
 		if (group == null) {
 			throw new ParameterInvalidException("group", "required");

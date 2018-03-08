@@ -1,7 +1,5 @@
 package ars.module.people.service;
 
-import java.util.Map;
-
 import ars.invoke.request.Requester;
 import ars.invoke.request.AccessDeniedException;
 import ars.invoke.request.ParameterInvalidException;
@@ -24,8 +22,8 @@ public abstract class AbstractGroupService<T extends Group> extends StandardGene
 		implements GroupService<T> {
 
 	@Override
-	public void initObject(Requester requester, T entity, Map<String, Object> parameters) {
-		super.initObject(requester, entity, parameters);
+	public void initObject(Requester requester, T entity) {
+		super.initObject(requester, entity);
 		Group parent = entity.getParent();
 		User owner = Repositories.getRepository(User.class).query().eq("code", requester.getUser()).single();
 		if (!owner.getAdmin() && owner.getGroup().getParent() != null
