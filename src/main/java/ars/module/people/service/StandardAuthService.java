@@ -15,7 +15,6 @@ import ars.util.Opcodes;
 import ars.util.Strings;
 import ars.util.Servers;
 import ars.util.SimpleCache;
-import ars.invoke.Invokes;
 import ars.invoke.request.Token;
 import ars.invoke.request.Requester;
 import ars.invoke.request.Session;
@@ -185,7 +184,7 @@ public class StandardAuthService
             Requester root = null;
             if (this.pattern == null) {
                 this.authentication(requester);
-            } else if ((root = Invokes.getRootRequester(requester)) == requester) {
+            } else if ((root = requester.getRoot()) == requester) {
                 if (Strings.matches(requester.getUri(), this.pattern)) {
                     this.authentication(requester);
                 }
