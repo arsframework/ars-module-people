@@ -7,11 +7,9 @@ import ars.database.service.BasicService;
 
 /**
  * 部门业务操作接口
- * 
- * @author yongqiangwu
- * 
- * @param <T>
- *            数据模型
+ *
+ * @param <T> 数据模型
+ * @author wuyongqiang
  */
 @Api("people/group")
 public interface GroupService<T extends Group> extends BasicService<T>, TreeService<T> {

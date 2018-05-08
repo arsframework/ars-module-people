@@ -6,11 +6,9 @@ import ars.database.service.SearchService;
 
 /**
  * 登录日志业务操作接口
- * 
- * @author yongqiangwu
- * 
- * @param <T>
- *            数据模型
+ *
+ * @param <T> 数据模型
+ * @author wuyongqiang
  */
 @Api("people/logined")
 public interface LoginedService<T extends Logined> extends SearchService<T> {

@@ -14,27 +14,26 @@ import ars.database.repository.Repositories;
 
 /**
  * Activiti组管理器实现
- * 
- * @author yongqiangwu
- * 
+ *
+ * @author wuyongqiang
  */
 public class ActivitiGroupEntityManager extends GroupEntityManager {
 
-	@Override
-	public List<Group> findGroupsByUser(String code) {
-		User user = Repositories.getRepository(User.class).query().eq("code", code).single();
-		Set<Role> roles = user.getRoles();
-		List<Group> groups = new ArrayList<Group>(roles.size());
-		for (Role role : roles) {
-			if (role.getActive()) {
-				GroupEntity group = new GroupEntity();
-				group.setId(role.getCode());
-				group.setName(role.getName());
-				group.setType("assignment");
-				groups.add(group);
-			}
-		}
-		return groups;
-	}
+    @Override
+    public List<Group> findGroupsByUser(String code) {
+        User user = Repositories.getRepository(User.class).query().eq("code", code).single();
+        Set<Role> roles = user.getRoles();
+        List<Group> groups = new ArrayList<Group>(roles.size());
+        for (Role role : roles) {
+            if (role.getActive()) {
+                GroupEntity group = new GroupEntity();
+                group.setId(role.getCode());
+                group.setName(role.getName());
+                group.setType("assignment");
+                groups.add(group);
+            }
+        }
+        return groups;
+    }
 
 }

@@ -6,11 +6,9 @@ import ars.database.service.BasicService;
 
 /**
  * 角色业务操作接口
- * 
- * @author yongqiangwu
- * 
- * @param <T>
- *            数据模型
+ *
+ * @param <T> 数据模型
+ * @author wuyongqiang
  */
 @Api("people/role")
 public interface RoleService<T extends Role> extends BasicService<T> {
